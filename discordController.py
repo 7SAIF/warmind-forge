@@ -772,13 +772,11 @@ def timeLeft():
     return output
 
 ai_actions = AI_Actions.AIFunctions()
-sql_actions = SQL_Actions.SQLFunctions()
 fireteam_actions = Fireteam_Actions.FireteamFunctions()
 
 fireteam_actions.expired_calendar_cleanup()
 current_jugs = "(.) (.)"
 
-# 209695933796057089
 async def my_background_task():
     await client.wait_until_ready()
     intercom_select = random.randint(0, intercom_quantity)
