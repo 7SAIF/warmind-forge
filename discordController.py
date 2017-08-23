@@ -576,9 +576,9 @@ def runBot(engine):
         elif message.content.startswith('!jugs') or message.content.startswith('!juggz') or \
                 message.content.startswith('!JUGGZ') or message.content.startswith('!JUGZ') or \
                 message.content.startswith('!juggs'):
-
+            current_jugs = "(.) (.)"
             this_jugs = random_jugs(current_jugs)
-            msg = f"{author.mention} // {this_jugs"}
+            msg = f"{author.mention} // {this_jugs}"
             await client.send_message(message.channel, msg)
 
         elif message.content.startswith('!hand') or message.content.startswith('!blow') or message.content.startswith(
@@ -790,10 +790,8 @@ async def my_background_task():
     #     await client.send_message(channel, "INTERCOM // "+intercom_message)
     #     await asyncio.sleep(randint(1080,2880)) # task runs randomly between 18 minutes and 48 minutes
 
-current_jugs = "(.) (.)"
-current_jugs = ai_actions.random_jugs(current_jugs)
 
-def random_jugs(self, current_jugs):
+def random_jugs(current_jugs):
     jugs_set = {'( o )( o )', '(o   )(   o)', '( @ )( @ )', '( . )( . )( . )', '(. Y .)', '[ # ] [ # ]', '(.) (.)',
                     '( # )( # ) ', '(< )  ( >)', '( $ )( $ )', '( 9. )( 9. )', '[ @ ][ @ ]', '( o Y o )', '( % )( % )',
                     '( + )( + )', '( | )( | )', '( 0.)( K.)', '( * )( * )', '( ? )( ? )', '( ! )( ! )', '( ^ )( ^ )',
@@ -801,9 +799,6 @@ def random_jugs(self, current_jugs):
                     '( ! )( ! )', '(  ÷  )(  ÷  )',
                     '(101100)(101100)', '( X )( X )', '( % )( % )', '( o )( o )', '( \' )( \' )', '( , )( , )',
                     '( 0 )( 0 )', '(\*)(\*)(\*)(\*)', '(  \`  )(  \`  )', '(  \*)(\*  )', '(  ☆  )(  ☆  )',
-                    '(  BE  )(  ER  )', '( ❄️ )( ❄ ️)', '(  !!!  )(  !!!  )']}
-    rng_jugs = (random.choice(jugs_list))
-    while current_jugs == rng_jugs:
-        rng_jugs = (random.choice(jugs_list))
-        print("REROLL JUGS: " + rng_jugs)
+                    '(  BE  )(  ER  )', '( ❄️ )( ❄ ️)', '(  !!!  )(  !!!    )'}
+    rng_jugs = random.choice(jugs_set - current_jugs)
     return rng_jugs
