@@ -390,4 +390,3 @@ def on_member_join(member):
 
 current_jugs = ai_actions.random_jugs(current_jugs)
 client.loop.create_task(my_background_task())
-client.run('MjEzMzU0NDAyMjM1NDE2NTc2.Co5N0A.pqDrY83i88piWpvRYl9bgzRQ26w')
