@@ -317,15 +317,15 @@ def runBot(engine):
 
         elif message.content.startswith('!court'):
             out = ai_actions.get_activity("Court of Oryx")
-            # print(repr(out))
-            msg = ('{0.author.mention} // Court of Oryx Tier 3 Challenger // ' + out[1]).format(message)
+            msg = f"{author.mention} // Court of Oryx Tier 3 Challenger // {out[1]}"
             await client.send_message(message.channel, msg)
 
         elif message.content.startswith('!kfraid'):
             out = ai_actions.get_activity("King's Fall")
-            msg = ('{0.author.mention} // Kings Fall Speculation // ' + out[1]).format(message)
+            msg = f"{author.mention} // King's Fall Speculation // {out[1]}"
             await client.send_message(message.channel, msg)
-
+        
+        #TODO: Figure out how these get printed
         elif message.content.startswith('!nightfall'):
             out = ai_actions.get_activity("Nightfall Strike")
             msg = ('{0.author.mention} // Nightfall Strike // ' + out[1] + '\n'
@@ -346,32 +346,32 @@ def runBot(engine):
 
         elif message.content.startswith('!strike'):
             out = ai_actions.get_activity("Daily Story Mission")
-            msg = ('{0.author.mention} // Daily Story Mission // ' + out[1]).format(message)
+            msg = f"{author.mention} // Daily Story Mission // {out[1]}"
             await client.send_message(message.channel, msg)
 
         elif message.content.startswith('!dcp'):
             out = ai_actions.get_activity("Daily Crucible Playlist")
-            msg = ('{0.author.mention} // Daily Crucible Playlist // ' + out[1]).format(message)
+            msg = f"{author.mention} // Daily Crucible Playlist // {out[1]}"
             await client.send_message(message.channel, msg)
 
         elif message.content.startswith('!wcp'):
             out = ai_actions.get_activity("Weekly Crucible Playlist")
-            msg = ('{0.author.mention} // Weekly Crucible Playlist // ' + out[1]).format(message)
+            msg = f"{author.mention} // Weekly Crucible Playlist // {out[1]}"
             await client.send_message(message.channel, msg)
 
         elif message.content.startswith('!message'):
             counter = 0
             tmp = await client.send_message(message.channel, 'Calculating messages...')
-            # asyncio.async
             for log in client.logs_from(message.channel, limit=100):
                 if log.author == message.author:
                     counter += 1
             await client.edit_message(tmp, 'You have {} messages.'.format(counter))
 
         elif message.content.startswith('!event'):
-            sep = "#"
-            this_author = str(message.author)
-            this_author = this_author.split(sep, 1)[0]
+            #sep = "#"
+            #this_author = str(message.author)
+            #this_author = this_author.split(sep, 1)[0]
+            this_author = message.content.name
             entered = message.content
             entered = entered.split(' ', 2)
             if len(entered) <= 1:
@@ -579,16 +579,16 @@ def runBot(engine):
 
         elif message.content.startswith('!hand') or message.content.startswith('!blow') or message.content.startswith(
                 '!fuck') or message.content.startswith('!suck'):
-            msg = '{0.author.mention} // PLEASE SEE TESS EVERIS, REQUEST A "CUSTOM SERVICE KIT"'.format(message)
+            msg = f"{author.mention} // PLEASE SEE TESS EVERIS, REQUEST A 'CUSTOM SERVICE KIT'"
             await client.send_message(message.channel, msg)
 
         elif message.content.startswith('!dickinabox'):
-            msg = '{0.author.mention} // PLEASE SEE RUSTY (SWEEPER BOT-63) TO PROCURE A BOX.\n1. Cut a hole in the box\n' \
-                '2. Put your junk in that box\n3. Make her open the box'.format(message)
+            msg = f"{author.mention} // PLEASE SEE RUSTY (SWEEPER BOT-63) TO PROCURE A BOX.\n1. Cut a hole in the box\n' \
+                '2. Put your junk in that box\n3. Make her open the box"
             await client.send_message(message.channel, msg)
 
         elif message.content.startswith('!clean') or message.content.startswith('!pay') or message.content.startswith('!die'):
-            msg = '{0.author.mention} // PLEASE SEE RUSTY (SWEEPER BOT-63), REQUEST "DOMESTIC ASSISTANCE"'.format(message)
+            msg = f"{author.mention} // PLEASE SEE RUSTY (SWEEPER BOT-63), REQUEST 'DOMESTIC ASSISTANCE'"
             await client.send_message(message.channel, msg)
 
         else:

@@ -43,18 +43,5 @@ class AIFunctions(object):
             print("REROLL JUGS: " + rng_jugs)
         return rng_jugs
 
-    def check_light(self, this_author):
-        # print(this_author)
-        conn = sqlite3.connect(sqlite_warmind)
-        c = conn.cursor()
-        c.execute('''SELECT chr1, chr2, chr3, chr1L, chr2L, chr3L FROM krew WHERE (name IS ?)''',
-                  (this_author.lower(),))
-        out = c.fetchone()
-        conn.close()
-        # print(repr(out))
-        msg = ('{0.author.mention} // GUARDIAN LIGHT LEVELS \n ' + out[0] + ' :: ' + out[3] + '\n ' + out[1] + ' :: ' + out[
-            4] + '\n ' + out[2] + ' :: ' + out[5] + '')
-        return msg
-
     def crater(self, live_manifest_version):
         pass
