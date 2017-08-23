@@ -178,6 +178,12 @@ def runBot(engine):
         await client.send_message(channel, resultList)
     
     @client.event
+    async def on_member_join(member):
+        server = member.server
+        msg = 'Guardian {0.mention} now joined server {1.name}!'
+        await client.send_message(server, msg.format(member, server))
+
+    @client.event
     async def registerHandler(discordAuthor):
         discId = discordAuthor.id
         session = Session()
@@ -296,10 +302,10 @@ def runBot(engine):
             entered = str(entered[1])
             msg1 = (f"{author.mention} you entered: {entered}")
             await client.send_message(message.channel, msg1)
-            out = ai_actions.get_activity("Weekly Heroic Strike")
-            msg2 = ('{0.author.mention} // Weekly Heroic Strike // ' + out[1] + '\n'
-                    '   SKULLS // ' + out[2]).format(message)
-            await client.send_message(message.channel, msg2)
+            #out = ai_actions.get_activity("Weekly Heroic Strike")
+            #msg2 = ('{0.author.mention} // Weekly Heroic Strike // ' + out[1] + '\n'
+            #        '   SKULLS // ' + out[2]).format(message)
+            #await client.send_message(message.channel, msg2)
 
         elif message.content.startswith('!hello'):
             msg = f"Hello {author.mention}"
@@ -313,49 +319,49 @@ def runBot(engine):
                 output += f"{item[1]}: {item[0]} "
             await client.send_message(message.channel, output)
 
-        elif message.content.startswith('!court'):
-            out = ai_actions.get_activity("Court of Oryx")
-            msg = f"{author.mention} // Court of Oryx Tier 3 Challenger // {out[1]}"
-            await client.send_message(message.channel, msg)
+       # elif message.content.startswith('!court'):
+       #     out = ai_actions.get_activity("Court of Oryx")
+       #     msg = f"{author.mention} // Court of Oryx Tier 3 Challenger // {out[1]}"
+       #     await client.send_message(message.channel, msg)
 
-        elif message.content.startswith('!kfraid'):
-            out = ai_actions.get_activity("King's Fall")
-            msg = f"{author.mention} // King's Fall Speculation // {out[1]}"
-            await client.send_message(message.channel, msg)
-        
-        #TODO: Figure out how these get printed
-        elif message.content.startswith('!nightfall'):
-            out = ai_actions.get_activity("Nightfall Strike")
-            msg = ('{0.author.mention} // Nightfall Strike // ' + out[1] + '\n'
-                '   SKULLS // ' + out[2]).format(message)
-            await client.send_message(message.channel, msg)
+       # elif message.content.startswith('!kfraid'):
+       #     out = ai_actions.get_activity("King's Fall")
+       #     msg = f"{author.mention} // King's Fall Speculation // {out[1]}"
+       #     await client.send_message(message.channel, msg)
+       # 
+       # #TODO: Figure out how these get printed
+       # elif message.content.startswith('!nightfall'):
+       #     out = ai_actions.get_activity("Nightfall Strike")
+       #     msg = ('{0.author.mention} // Nightfall Strike // ' + out[1] + '\n'
+       #         '   SKULLS // ' + out[2]).format(message)
+       #     await client.send_message(message.channel, msg)
 
-        elif message.content.startswith('!coe'):
-            out = ai_actions.get_activity("Challenge of the Elders")
-            msg = ('{0.author.mention} // Challenge of the Elders // ' + out[1] + '\n'
-                '   SKULLS // ' + out[2]).format(message)
-            await client.send_message(message.channel, msg)
+       # elif message.content.startswith('!coe'):
+       #     out = ai_actions.get_activity("Challenge of the Elders")
+       #     msg = ('{0.author.mention} // Challenge of the Elders // ' + out[1] + '\n'
+       #         '   SKULLS // ' + out[2]).format(message)
+       #     await client.send_message(message.channel, msg)
 
-        elif message.content.startswith('!heroic'):
-            out = ai_actions.get_activity("Weekly Heroic Strike")
-            msg = ('{0.author.mention} // Weekly Heroic Strike // ' + out[1] + '\n'
-                '   SKULLS // ' + out[2]).format(message)
-            await client.send_message(message.channel, msg)
+       # elif message.content.startswith('!heroic'):
+       #     out = ai_actions.get_activity("Weekly Heroic Strike")
+       #     msg = ('{0.author.mention} // Weekly Heroic Strike // ' + out[1] + '\n'
+       #         '   SKULLS // ' + out[2]).format(message)
+       #     await client.send_message(message.channel, msg)
 
-        elif message.content.startswith('!strike'):
-            out = ai_actions.get_activity("Daily Story Mission")
-            msg = f"{author.mention} // Daily Story Mission // {out[1]}"
-            await client.send_message(message.channel, msg)
+       # elif message.content.startswith('!strike'):
+       #     out = ai_actions.get_activity("Daily Story Mission")
+       #     msg = f"{author.mention} // Daily Story Mission // {out[1]}"
+       #     await client.send_message(message.channel, msg)
 
-        elif message.content.startswith('!dcp'):
-            out = ai_actions.get_activity("Daily Crucible Playlist")
-            msg = f"{author.mention} // Daily Crucible Playlist // {out[1]}"
-            await client.send_message(message.channel, msg)
+       # elif message.content.startswith('!dcp'):
+       #     out = ai_actions.get_activity("Daily Crucible Playlist")
+       #     msg = f"{author.mention} // Daily Crucible Playlist // {out[1]}"
+       #     await client.send_message(message.channel, msg)
 
-        elif message.content.startswith('!wcp'):
-            out = ai_actions.get_activity("Weekly Crucible Playlist")
-            msg = f"{author.mention} // Weekly Crucible Playlist // {out[1]}"
-            await client.send_message(message.channel, msg)
+       # elif message.content.startswith('!wcp'):
+       #     out = ai_actions.get_activity("Weekly Crucible Playlist")
+       #     msg = f"{author.mention} // Weekly Crucible Playlist // {out[1]}"
+       #     await client.send_message(message.channel, msg)
 
         elif message.content.startswith('!message'):
             counter = 0
@@ -570,9 +576,9 @@ def runBot(engine):
         elif message.content.startswith('!jugs') or message.content.startswith('!juggz') or \
                 message.content.startswith('!JUGGZ') or message.content.startswith('!JUGZ') or \
                 message.content.startswith('!juggs'):
-            print(current_jugs)
-            this_jugs = ai_actions.random_jugs(current_jugs)
-            msg = ('{0.author.mention} // '+this_jugs).format(message)
+
+            this_jugs = random_jugs(current_jugs)
+            msg = f"{author.mention} // {this_jugs"}
             await client.send_message(message.channel, msg)
 
         elif message.content.startswith('!hand') or message.content.startswith('!blow') or message.content.startswith(
@@ -771,11 +777,8 @@ def timeLeft():
     output = "There are "+untilRelease+" days until release!"
     return output
 
-ai_actions = AI_Actions.AIFunctions()
 fireteam_actions = Fireteam_Actions.FireteamFunctions()
-
 fireteam_actions.expired_calendar_cleanup()
-current_jugs = "(.) (.)"
 
 async def my_background_task():
     await client.wait_until_ready()
@@ -787,11 +790,20 @@ async def my_background_task():
     #     await client.send_message(channel, "INTERCOM // "+intercom_message)
     #     await asyncio.sleep(randint(1080,2880)) # task runs randomly between 18 minutes and 48 minutes
 
-@client.event
-async def on_member_join(member):
-    server = member.server
-    msg = 'Guardian {0.mention} now joined server {1.name}!'
-    await client.send_message(server, msg.format(member, server))
-
+current_jugs = "(.) (.)"
 current_jugs = ai_actions.random_jugs(current_jugs)
-client.loop.create_task(my_background_task())
+
+def random_jugs(self, current_jugs):
+    jugs_set = {'( o )( o )', '(o   )(   o)', '( @ )( @ )', '( . )( . )( . )', '(. Y .)', '[ # ] [ # ]', '(.) (.)',
+                    '( # )( # ) ', '(< )  ( >)', '( $ )( $ )', '( 9. )( 9. )', '[ @ ][ @ ]', '( o Y o )', '( % )( % )',
+                    '( + )( + )', '( | )( | )', '( 0.)( K.)', '( * )( * )', '( ? )( ? )', '( ! )( ! )', '( ^ )( ^ )',
+                    '( ~ )( ~ )', '( : )( : )', '( Dr )( PC )', '( - )( - )', '( (^) )( (^) )', '( i )( i )',
+                    '( ! )( ! )', '(  ÷  )(  ÷  )',
+                    '(101100)(101100)', '( X )( X )', '( % )( % )', '( o )( o )', '( \' )( \' )', '( , )( , )',
+                    '( 0 )( 0 )', '(\*)(\*)(\*)(\*)', '(  \`  )(  \`  )', '(  \*)(\*  )', '(  ☆  )(  ☆  )',
+                    '(  BE  )(  ER  )', '( ❄️ )( ❄ ️)', '(  !!!  )(  !!!  )']}
+    rng_jugs = (random.choice(jugs_list))
+    while current_jugs == rng_jugs:
+        rng_jugs = (random.choice(jugs_list))
+        print("REROLL JUGS: " + rng_jugs)
+    return rng_jugs
