@@ -16,8 +16,6 @@ from warmind import SQL_Actions
 from warmind import AI_Actions
 from warmind.Global_Variables import *
 
-import sqlite3
-
 playerList = [item[0] for item in Session().query(Account.display_name).all()]
 
 statDict = { "kd"           :(PvPAggregate, "killsDeathsRatio", "Kill/Death Ratio")
@@ -780,17 +778,6 @@ fireteam_actions = Fireteam_Actions.FireteamFunctions()
 fireteam_actions.expired_calendar_cleanup()
 current_jugs = "(.) (.)"
 
-server = "https://discordapp.com/api/servers/209503319205478401/widget.json"
-channel = discord.Object(id='209695933796057089')
-client = discord.Client()
-
-def join_server():
-    devid = "209508738011365377"
-    devserver = "https://discordapp.com/api/servers/" + devid + "/widget.json"
-    devchannel = discord.Object(id='209508738011365377')
-    devclient = discord.Client()
-    url = "https://discordapp.com/oauth2/authorize?client_id=213354402235416576&scope=bot&permissions=536345663"
-
 # 209695933796057089
 async def my_background_task():
     await client.wait_until_ready()
@@ -805,10 +792,8 @@ async def my_background_task():
 @client.event
 async def on_member_join(member):
     server = member.server
-    msg = 'Guardian {0.mention} now registered online with {1.name}!'
+    msg = 'Guardian {0.mention} now joined server {1.name}!'
     await client.send_message(server, msg.format(member, server))
-    # await client.send_message(discord.Message.channel, fmt.format(discord.Message))
-    # member, server
 
 current_jugs = ai_actions.random_jugs(current_jugs)
 client.loop.create_task(my_background_task())
