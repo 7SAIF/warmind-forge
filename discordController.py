@@ -3,8 +3,8 @@ import os, re, sys, random
 import discord, asyncio
 from datetime import datetime
 from destinygotg import Session, loadConfig
-from initdb import PvPAggregate, PvEAggregate, Base, Discord, Account, AccountMedals
-from sqlalchemy import exists, desc, func
+from initdb import PvPAggregate, PvEAggregate, Base, Discord, Account, AccountMedals, Character, ClassReference
+from sqlalchemy import exists, desc, func, and_
 from decimal import *
 import numpy as np
 import matplotlib as mpl
@@ -170,6 +170,7 @@ def runBot(engine):
         print('Logged in as')
         print(client.user.name)
         print(client.user.id)
+        # await client.send_message(discord.Message.channel, 'AI-COMS: Initializing Channel Interface')
         print('------')
 
     @client.event
@@ -217,6 +218,8 @@ def runBot(engine):
             return None
 
         elif message.content.startswith('!help'):
+            #TODO: Send a dm to user with contents of help command
+            #TODO: Add all commands to body of help response
             msg = ('AI-COMS // {0.author.mention} COMMAND SYNTAX: '
                 '\n `!light` conveys last culled light levels '
                 '\n `!event` schedules an incursion '
@@ -289,52 +292,11 @@ def runBot(engine):
             pass
 
 
-        elif message.content.startswith('!fraggle') and author == "MtnFraggle#9145":
-            msg = '{0.author.mention} 9er asked me to tell you this: ' \
-                'To quote: Hey glorious leader, go to take selfie video while you read this `!morefraggle` \n' \
-                'You are to send me the video of you examining and using these instructions. ' \
-                'Next communication is from 9er'.format(message)
-            await client.send_message(message.channel, msg)
-
-        elif message.content.startswith('!morefraggle') and author == "MtnFraggle#9145":
-            msg = 'VIDEO DAMN IT. Read this then issue `!event help` \n' \
-                'I hope you really like this. It took me about 2 weeks to create. \n' \
-                'I thought this might be a good starting block for events if you wanted to move to discord. \n' \
-                'like everything, it will get better over time and I think it is pretty damn cool. \n' \
-                '\n `!event` << a new function ' \
-                '\n `!event help` << a help function ' \
-                '\n `!event list` << lists events ' \
-                '\n `!event join` # << change # to the INCURSION ID to join the fireteam' \
-                '\n `!event leave` # << to leave the fireteam '.format(message)
-            await client.send_message(message.channel, msg)
-
-        elif message.content.startswith('!jugs') or message.content.startswith('!juggz') or \
-                message.content.startswith('!JUGGZ') or message.content.startswith('!JUGZ') or \
-                message.content.startswith('!juggs'):
-            print(current_jugs)
-            this_jugs = ai_actions.random_jugs(current_jugs)
-            msg = ('{0.author.mention} // '+this_jugs).format(message)
-            await client.send_message(message.channel, msg)
-
-        elif message.content.startswith('!hand') or message.content.startswith('!blow') or message.content.startswith(
-                '!fuck') or message.content.startswith('!suck'):
-            msg = '{0.author.mention} // PLEASE SEE TESS EVERIS, REQUEST A "CUSTOM SERVICE KIT"'.format(message)
-            await client.send_message(message.channel, msg)
-
-        elif message.content.startswith('!dickinabox'):
-            msg = '{0.author.mention} // PLEASE SEE RUSTY (SWEEPER BOT-63) TO PROCURE A BOX.\n1. Cut a hole in the box\n' \
-                '2. Put your junk in that box\n3. Make her open the box'.format(message)
-            await client.send_message(message.channel, msg)
-
-        elif message.content.startswith('!clean') or message.content.startswith('!pay') or message.content.startswith('!die'):
-            msg = '{0.author.mention} // PLEASE SEE RUSTY (SWEEPER BOT-63), REQUEST "DOMESTIC ASSISTANCE"'.format(message)
-            await client.send_message(message.channel, msg)
-
         elif (message.content.startswith('!test')) and (("N1N3 13#7837" == author) or ("Irronies#9467" == author)):
             entered = message.content
             entered = entered.split(' ', 1)
             entered = str(entered[1])
-            msg1 = ('{0.author.mention} you entered: '.format(message) + entered)
+            msg1 = (f"{author.mention} you entered: {entered}")
             await client.send_message(message.channel, msg1)
             out = ai_actions.get_activity("Weekly Heroic Strike")
             msg2 = ('{0.author.mention} // Weekly Heroic Strike // ' + out[1] + '\n'
@@ -342,15 +304,16 @@ def runBot(engine):
             await client.send_message(message.channel, msg2)
 
         elif message.content.startswith('!hello'):
-            msg = 'Hello {0.author.mention}'.format(message)
+            msg = f"Hello {author.mention}"
             await client.send_message(message.channel, msg)
 
         elif message.content.startswith('!light'):
-            sep = "#"
-            this_author = str(message.author)
-            this_author = this_author.split(sep, 1)[0]
-            msg = ai_actions.check_light(this_author)
-            await client.send_message(message.channel, msg.format(message))
+            player = await registerHandler(message.author)
+            data = lightLevelRequest(player)
+            output = ""
+            for item in data:
+                output += f"{item[1]}: {item[0]} "
+            await client.send_message(message.channel, output)
 
         elif message.content.startswith('!court'):
             out = ai_actions.get_activity("Court of Oryx")
@@ -587,10 +550,51 @@ def runBot(engine):
             await asyncio.sleep(5)
             await client.send_message(message.channel, 'AI-COMS // Warminds do not sleep')
 
+        elif message.content.startswith('!fraggle') and author == "MtnFraggle#9145":
+            msg = '{0.author.mention} 9er asked me to tell you this: ' \
+                'To quote: Hey glorious leader, go to take selfie video while you read this `!morefraggle` \n' \
+                'You are to send me the video of you examining and using these instructions. ' \
+                'Next communication is from 9er'.format(message)
+            await client.send_message(message.channel, msg)
+
+        elif message.content.startswith('!morefraggle') and author == "MtnFraggle#9145":
+            msg = 'VIDEO DAMN IT. Read this then issue `!event help` \n' \
+                'I hope you really like this. It took me about 2 weeks to create. \n' \
+                'I thought this might be a good starting block for events if you wanted to move to discord. \n' \
+                'like everything, it will get better over time and I think it is pretty damn cool. \n' \
+                '\n `!event` << a new function ' \
+                '\n `!event help` << a help function ' \
+                '\n `!event list` << lists events ' \
+                '\n `!event join` # << change # to the INCURSION ID to join the fireteam' \
+                '\n `!event leave` # << to leave the fireteam '.format(message)
+            await client.send_message(message.channel, msg)
+
+        elif message.content.startswith('!jugs') or message.content.startswith('!juggz') or \
+                message.content.startswith('!JUGGZ') or message.content.startswith('!JUGZ') or \
+                message.content.startswith('!juggs'):
+            print(current_jugs)
+            this_jugs = ai_actions.random_jugs(current_jugs)
+            msg = ('{0.author.mention} // '+this_jugs).format(message)
+            await client.send_message(message.channel, msg)
+
+        elif message.content.startswith('!hand') or message.content.startswith('!blow') or message.content.startswith(
+                '!fuck') or message.content.startswith('!suck'):
+            msg = '{0.author.mention} // PLEASE SEE TESS EVERIS, REQUEST A "CUSTOM SERVICE KIT"'.format(message)
+            await client.send_message(message.channel, msg)
+
+        elif message.content.startswith('!dickinabox'):
+            msg = '{0.author.mention} // PLEASE SEE RUSTY (SWEEPER BOT-63) TO PROCURE A BOX.\n1. Cut a hole in the box\n' \
+                '2. Put your junk in that box\n3. Make her open the box'.format(message)
+            await client.send_message(message.channel, msg)
+
+        elif message.content.startswith('!clean') or message.content.startswith('!pay') or message.content.startswith('!die'):
+            msg = '{0.author.mention} // PLEASE SEE RUSTY (SWEEPER BOT-63), REQUEST "DOMESTIC ASSISTANCE"'.format(message)
+            await client.send_message(message.channel, msg)
+
         else:
             pass
     client.run(os.environ['DISCORD_APIKEY'])
-    
+
 # Stat number codes - 0: Not a stat, 1: PvP/PvE aggregate, 2: Medal
 def validate(player, content):
     statList = content.split(" ")[1:]
@@ -629,7 +633,13 @@ def validateClanStat(player, content):
     if isValidPlayer:
         playerName = player
     return ((trackCode != 0), playerName, trackCode, stat)
-    
+
+def lightLevelRequest(player):
+    """Retrieves the character light levels of a player"""
+    session = Session()
+    data = session.query(Character.light_level, ClassReference.class_name).join(Account).join(ClassReference, and_(ClassReference.id==Character.class_hash)).filter(Account.display_name == player).all()
+    return data
+
 def singleStatRequest(player, code, stat):
     """Actually retrieves the stat and returns the stat info in an embed"""
     session = Session()
@@ -763,7 +773,6 @@ def timeLeft():
     output = "There are "+untilRelease+" days until release!"
     return output
 
-
 ai_actions = AI_Actions.AIFunctions()
 sql_actions = SQL_Actions.SQLFunctions()
 fireteam_actions = Fireteam_Actions.FireteamFunctions()
@@ -775,23 +784,12 @@ server = "https://discordapp.com/api/servers/209503319205478401/widget.json"
 channel = discord.Object(id='209695933796057089')
 client = discord.Client()
 
-
 def join_server():
     devid = "209508738011365377"
     devserver = "https://discordapp.com/api/servers/" + devid + "/widget.json"
     devchannel = discord.Object(id='209508738011365377')
     devclient = discord.Client()
     url = "https://discordapp.com/oauth2/authorize?client_id=213354402235416576&scope=bot&permissions=536345663"
-
-
-@client.event
-async def on_ready():
-    print('Logged in as')
-    print(client.user.name)
-    print(client.user.id)
-    # await client.send_message(discord.Message.channel, 'AI-COMS: Initializing Channel Interface')
-    print('------')
-
 
 # 209695933796057089
 async def my_background_task():
@@ -804,8 +802,6 @@ async def my_background_task():
     #     await client.send_message(channel, "INTERCOM // "+intercom_message)
     #     await asyncio.sleep(randint(1080,2880)) # task runs randomly between 18 minutes and 48 minutes
 
-
-
 @client.event
 async def on_member_join(member):
     server = member.server
@@ -813,7 +809,6 @@ async def on_member_join(member):
     await client.send_message(server, msg.format(member, server))
     # await client.send_message(discord.Message.channel, fmt.format(discord.Message))
     # member, server
-
 
 current_jugs = ai_actions.random_jugs(current_jugs)
 client.loop.create_task(my_background_task())
