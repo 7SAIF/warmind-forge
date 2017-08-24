@@ -162,6 +162,7 @@ medalDict = { "activities"        :(AccountMedals, "activitiesEntered", "Activit
 def runBot(engine):
     # The regular bot definition things
     client = discord.Client()
+    session = Session()
 
     @client.event
     async def on_ready():
@@ -186,7 +187,6 @@ def runBot(engine):
     @client.event
     async def registerHandler(discordAuthor):
         discId = discordAuthor.id
-        session = Session()
         userIsRegistered = session.query(exists().where(Discord.id == discId)).scalar()
         if userIsRegistered:
             destinyName = session.query(Account.display_name).join(Discord).filter(Discord.id == discId).first()[0]
@@ -196,7 +196,6 @@ def runBot(engine):
 
     @client.event
     async def registerUser(discordAuthor):
-        session = Session()
         def checkIfValidUser(userName):
             return session.query(exists().where(Account.display_name == userName)).scalar()
         #Need to send a DM requesting the PSN name
@@ -207,7 +206,7 @@ def runBot(engine):
         destName = nameMsg.content
         discordDict = {}
         discordDict['id'] = discordAuthor.id
-        discordDict['discord_name'] = discordAuthor.name
+        discordDict['discord_name'] = discName
         discordDict['membership_id'] = session.query(Account.id).filter(Account.display_name == destName).first()[0]
         new_discord_user = Discord(**discordDict)
         session.add(new_discord_user)
@@ -655,27 +654,22 @@ def singleStatRequest(player, code, stat):
         #Returns a tuple containing the stat, but only the first element is defined for some reason.
         num = truncateDecimals(res[0])
         name = res[1]
-    elif code == 2:
-        (table, col, message) = medalDict[stat]
-        columns = [col]
-        res = session.query(func.sum(*(getattr(table, column) for column in columns))).join(Account).filter(Account.display_name == player).group_by(AccountMedals.id).first()
-        num = res[0]
-        name = player
-        if message != "Activities Entered" and message != "Total Number of Medals" and message != "Total Medal Score":
-            message = f"Total {message} Medals"
-    elif code == 3:
+    elif code == 2 or code == 3:
         (table, col, message) = medalDict[stat]
         columns = [col]
         res = session.query(func.sum(*(getattr(table, column) for column in columns))).join(Account).filter(Account.display_name == player).group_by(AccountMedals.id).first()
         num = float(res[0])
-        denominator = session.query(PvPAggregate.activitiesEntered).join(Account).filter(Account.display_name == player).first()
-        act = denominator[0]
-        num = num/act
         name = player
         if message != "Activities Entered" and message != "Total Number of Medals" and message != "Total Medal Score":
-            message = f"{message} Medals per Game"
-        else:
-            message = f"{message} per Game"
+            message = f"Total {message} Medals"
+        if code == 3:
+            denominator = session.query(PvPAggregate.activitiesEntered).join(Account).filter(Account.display_name == player).first()
+            act = denominator[0]
+            num = num/act
+            if message != "Activities Entered" and message != "Total Number of Medals" and message != "Total Medal Score":
+                message = f"{message} Medals per Game"
+            else:
+                message = f"{message} per Game"
     #em = discord.Embed(title = f"{author}{message}{result}", colour=0xADD8E6)
     em = f"```{message} for {name}: {num}```"
     return em
@@ -692,9 +686,8 @@ def multiStatRequest(players, code, stat):
         (table, col, message) = medalDict[stat]
         columns = [col]
         res = session.query(func.sum(*(getattr(table, column) for column in columns)), Account.display_name).join(Account).filter(Account.display_name.in_(players)).group_by(AccountMedals.id).order_by(Account.display_name).all()
-        if code == 2:
-            data = [(item[1], truncateDecimals(item[0])) for item in res if item[0] is not None]
-        elif code == 3:
+        data = [(item[1], truncateDecimals(item[0])) for item in res if item[0] is not None]
+        if code == 3:
             numActivities = session.query(PvPAggregate.activitiesEntered).join(Account).filter(Account.display_name.in_(players)).order_by(Account.display_name).all()
             data = [(res[i][1], truncateDecimals(float(res[i][0])/numActivities[i][0])) for i in range(len(res)) if res[i][0] is not None]
     data = sorted(data, key=lambda x: x[1], reverse=True)
@@ -716,19 +709,15 @@ def clanGraphRequest(player, code, stat):
         columns = [col]
         res = session.query(*(getattr(table, column) for column in columns), Account.display_name).join(Account).all()
         rawdata = [(item[1], truncateDecimals(item[0])) for item in res if item[0] is not None]
-    elif code == 2:
+    elif code == 2 or code == 3:
         (table, col, message) = medalDict[stat]
         columns = [col]
         res = session.query(func.sum(*(getattr(table, column) for column in columns)), Account.display_name).join(Account).group_by(AccountMedals.id).all()
         rawdata = [(item[1], truncateDecimals(item[0])) for item in res if item[0] is not None]
-    elif code == 3:
-        (table, col, message) = medalDict[stat]
-        
-        columns = [col]
-        res = session.query(func.sum(*(getattr(table, column) for column in columns)), Account.display_name).join(Account).group_by(AccountMedals.id).all()
-        numActivities = session.query(PvPAggregate.activitiesEntered, Account.display_name).join(Account).all()
-        #Need to associate numActivities with the correct username
-        rawdata = [(item[1], truncateDecimals(item[0])/float(activity[0])) for item in res for activity in numActivities if item[1] == activity[1] and item[0] is not None and activity[0] is not None]
+        if code == 3:
+            numActivities = session.query(PvPAggregate.activitiesEntered, Account.display_name).join(Account).all()
+            #Need to associate numActivities with the correct username
+            rawdata = [(item[1], truncateDecimals(item[0])/float(activity[0])) for item in res for activity in numActivities if item[1] == activity[1] and item[0] is not None and activity[0] is not None]
     if (code == 2 or code == 3) and message != "Activities Entered" and message != "Total Number of Medals" and message != "Total Medal Score":
         message = f"Total {message} Medals"
     data = sorted(rawdata, key=lambda x: x[1])
