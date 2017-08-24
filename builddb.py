@@ -32,15 +32,15 @@ def buildDB():
     """Main function to build the full database"""
     start_time = time.clock()
     session = Session()
-    #handleBungieTable()
-    #handleAccountTable()
-    #handleAggregateTables()
-    #handleCharacterTable()
-    #handleWeaponUsageTable()
-    #handleActivityStatsTable()
-    #handleMedalTable()
-    #handleAccountActivityModeStatsTable()
-    #handleReferenceTables()
+    handleBungieTable()
+    handleAccountTable()
+    handleAggregateTables()
+    handleCharacterTable()
+    handleWeaponUsageTable()
+    handleActivityStatsTable()
+    handleMedalTable()
+    handleAccountActivityModeStatsTable()
+    handleReferenceTables()
     print("--- %s seconds ---" % (time.clock() - start_time))
 
 #infoMap = {'attrs':{'attr1':'attr1Name', ...}
@@ -63,27 +63,14 @@ def requestAndInsert(session, request_session, infoMap, staticMap, url, outFile,
     if group == None:
         print("No group found.")
         return ([], None)
-    if type(group) == list:
-        for elem in group:
-            if elem == None:
-                continue
-            #buildDict uses a nifty dynamic dictionary indexing function that allows us to grab info from multiply-nested fields in the dict
-            insertDict = buildDict(elem, infoMap['values'])
-            #Statics are pre-defined values - maybe the id from user.id in defineParams
-            if 'statics' in infoMap:
-                insertDict = {**insertDict, **staticMap}
-            #Create a new element for insertion using kwargs
-            #print(insertDict)
-            insert_elem = table(**insertDict)
-            inspection = inspect(insert_elem)
-            objectDict = inspection.dict
-            primaryKeyMap = {}
-            for key in infoMap['primary_keys']:
-                primaryKeyMap[key] = objectDict[key]
-            #Upsert the element
-            addList.append(upsert(table, primaryKeyMap, insert_elem, session))
-    elif type(group) == dict:
-        insertDict = buildDict(group, infoMap['values'])
+    if type(group) == dict:
+        group = [group]
+    for elem in group:
+        if elem == None:
+            continue
+        #buildDict uses a nifty dynamic dictionary indexing function that allows us to grab info from multiply-nested fields in the dict
+        insertDict = buildDict(elem, infoMap['values'])
+        #Statics are pre-defined values - maybe the id from user.id in defineParams
         if 'statics' in infoMap:
             insertDict = {**insertDict, **staticMap}
         #Create a new element for insertion using kwargs
@@ -189,7 +176,6 @@ def handleAccountTable():
     """Retrieve JSONs for users, listing their Destiny accounts. Fills account table."""
     def accountUrl(id, membershipType):
         return f"{GROUP_URL_START}/User/GetMembershipsById/{id}/{membershipType}"
-    session = Session()
     queryTable = Bungie
     infoMap = {'attrs'  :{'id'             : 'id'
                          ,'name'           : 'bungie_name'
@@ -244,7 +230,6 @@ def handleAggregateTables():
             addList.append(fillAndInsertDict(stats, table, staticMap))
         return (addList, None)
     
-    session = Session()
     queryTable = Account
     infoMap = {'attrs'  :{'id'             : 'id'
                          ,'name'           : 'display_name'
@@ -263,7 +248,6 @@ def handleAggregateTables():
 def handleCharacterTable():
     def characterUrl(membershipId, membershipType):
         return f"{URL_START}/Destiny/{membershipType}/Account/{membershipId}"
-    session = Session()
     queryTable = Account
     infoMap = {'attrs' :{'membershipId' : 'id'
                         ,'name' : 'display_name'
@@ -286,7 +270,6 @@ def handleWeaponUsageTable():
     def weaponUrl(id, membershipType):
         #0 can be used instead of character ids
         return f"{URL_START}/Destiny/Stats/UniqueWeapons/{membershipType}/{id}/0"
-    session = Session()
     queryTable = Account
     infoMap = {'attrs' :{'id' : 'id'
                         ,'name' : 'display_name'
@@ -307,7 +290,6 @@ def handleWeaponUsageTable():
 def handleActivityStatsTable():
     def activityUrl(id, membershipId, membershipType):
         return f"{URL_START}/Destiny/Stats/AggregateActivityStats/{membershipType}/{membershipId}/{id}/"
-    session = Session()
     queryTable = Character
     infoMap = {'attrs' :{'id' : 'id'
                         ,'membershipId' : 'membership_id'
@@ -328,7 +310,6 @@ def handleActivityStatsTable():
 def handleMedalTable():
     def medalUrl(id, membershipType):
         return f"{URL_START}/Destiny/Stats/Account/{membershipType}/{id}/?Groups=Medals"
-    session = Session()
     queryTable = Account
     infoMap = {'attrs' :{'id' : 'id'
                         ,'name' : 'display_name'
@@ -346,7 +327,6 @@ def handleMedalTable():
 def handleAccountActivityModeStatsTable():
     def activityModeUrl(id, membershipType, mode):
         return f"{URL_START}/Destiny/Stats/{membershipType}/{id}/0/?modes={mode}"
-    session = Session()
     queryTable = Account
     modeDict = {2:'story', 3:'strike', 4:'raid', 5:'allPvP', 6:'patrol', 7:'allPvE', 8:'pvpIntroduction', 9:'threeVsThree', 10:'control'
                ,11 : 'lockdown', 12:'team', 13:'freeForAll', 14:'trialsOfOsiris', 15:'doubles', 16:'nightfall', 17:'heroic', 18:'allStrikes', 19:'ironBanner', 20:'allArena'
@@ -467,7 +447,6 @@ def jsonRequest(request_session, url, outFile, message=""):
     print(f"Connecting to Bungie: {url}")
     print(message)
     headers = makeHeader()
-    #print(url)
     res = request_session.get(url, headers=headers)
     #print(res.text)
     try:
@@ -485,17 +464,11 @@ def jsonRequest(request_session, url, outFile, message=""):
         return None 
 
 def upsert(table, primaryKeyMap, obj, session):
-    add = False
     first = session.query(table).filter_by(**primaryKeyMap).first()
-    add = False
     if first != None:
         session.query(table).filter_by(**primaryKeyMap).update({column: getattr(obj, column) for column in table.__table__.columns.keys()})
-    else:
-        add = True
-    if add:
-        return obj
-    else:
         return None
+    return obj
 
 def needsUpdate(table, kwargs, session):
     now = datetime.now()
