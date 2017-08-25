@@ -11,9 +11,10 @@ import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.mlab as mlab
 import matplotlib.pyplot as plt; plt.rcdefaults()
-from warmind import Fireteam_Actions
-from warmind import SQL_Actions
-from warmind.Global_Variables import *
+import Fireteam_Actions
+# from warmind import Fireteam_Actions
+# from warmind import SQL_Actions
+# from warmind.Global_Variables import *
 
 playerList = [item[0] for item in Session().query(Account.display_name).all()]
 
@@ -772,7 +773,7 @@ async def my_background_task():
     await client.wait_until_ready()
     intercom_select = random.randint(0, intercom_quantity)
     intercom_message = intercom[intercom_select]
-    channel = discord.Object(id='209695933796057089')
+    # channel = discord.Object(id='209695933796057089')
     await client.send_message(channel, 'AI-COMS // Initializing Channel Interface')
     # while not client.is_closed:
     #     await client.send_message(channel, "INTERCOM // "+intercom_message)
@@ -790,3 +791,5 @@ def random_jugs(current_jugs):
                     '(  BE  )(  ER  )', '( ❄️ )( ❄ ️)', '(  !!!  )(  !!!    )'}
     rng_jugs = random.choice(jugs_set - current_jugs)
     return rng_jugs
+
+
