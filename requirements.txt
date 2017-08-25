@@ -1,0 +1,5 @@
+sqlalchemy
+requests
+discord
+numpy
+matplotlib
