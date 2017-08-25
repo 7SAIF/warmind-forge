@@ -13,7 +13,6 @@ import matplotlib.mlab as mlab
 import matplotlib.pyplot as plt; plt.rcdefaults()
 from warmind import Fireteam_Actions
 from warmind import SQL_Actions
-from warmind import AI_Actions
 from warmind.Global_Variables import *
 
 playerList = [item[0] for item in Session().query(Account.display_name).all()]
