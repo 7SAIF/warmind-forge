@@ -328,7 +328,6 @@ def runBot(engine):
        #     msg = f"{author.mention} // King's Fall Speculation // {out[1]}"
        #     await client.send_message(message.channel, msg)
        # 
-       # #TODO: Figure out how these get printed
        # elif message.content.startswith('!nightfall'):
        #     out = ai_actions.get_activity("Nightfall Strike")
        #     msg = ('{0.author.mention} // Nightfall Strike // ' + out[1] + '\n'
