@@ -1,3 +1,4 @@
+#!/usr/bin/python3.6
 import os
 import sys
 import model
@@ -37,7 +38,7 @@ def main():
     model.initDB(engine)
     model.buildDB()
     
-    model.runDiscord(engine)
+    model.runDiscord()
     #runFlask()
 
 def setAppPath():

@@ -6,6 +6,7 @@ import builddb
 import requests, zipfile
 import shutil
 import discordController
+import eventHandler
 
 APP_PATH = "/etc/destinygotg"
 DBPATH = f"{APP_PATH}/guardians.db"
@@ -42,5 +43,7 @@ def buildDB():
     """Main function to build the full database"""
     builddb.buildDB()
 
-def runDiscord(engine):
-    discordController.runBot(engine)
+def runDiscord():
+    # Some notion of installing and running plugins. For now, hardcoded.
+    eventHandler.initdb()
+    discordController.runBot()

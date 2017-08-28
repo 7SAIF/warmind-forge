@@ -16,8 +16,9 @@ mpl.use('Agg')
 import matplotlib.pyplot as plt
 
 plt.rcdefaults()
-import Fireteam_Actions
+import eventHandler
 
+eventHandler = eventHandler.FireteamFunctions()
 # from warmind import Fireteam_Actions
 # from warmind import SQL_Actions
 # from warmind.Global_Variables import *
@@ -166,7 +167,7 @@ medalDict = {"activities": (AccountMedals, "activitiesEntered", "Activities Ente
              }
 
 
-def runBot(engine):
+def runBot():
     # The regular bot definition things
     client = discord.Client()
     session = Session()
@@ -307,9 +308,12 @@ def runBot(engine):
             if administratorRole in [role.name for role in message.author.roles]:
                 entered = message.content
                 entered = entered.split(' ', 1)
-                entered = str(entered[1])
-                msg1 = (f"{author.mention} you entered: {entered}")
-                await client.send_message(message.channel, msg1)
+                if len(entered) == 1:
+                    await client.send_message(message.channel, "Test successful.")
+                else:
+                    entered = str(entered[1])
+                    msg1 = (f"{author.mention} you entered: {entered}")
+                    await client.send_message(message.channel, msg1)
             # out = ai_actions.get_activity("Weekly Heroic Strike")
             # msg2 = ('{0.author.mention} // Weekly Heroic Strike // ' + out[1] + '\n'
             #        '   SKULLS // ' + out[2]).format(message)
@@ -382,20 +386,27 @@ def runBot(engine):
             # sep = "#"
             # this_author = str(message.author)
             # this_author = this_author.split(sep, 1)[0]
-            this_author = message.content.name
+            this_author = message.author.name
             entered = message.content
             entered = entered.split(' ', 2)
             if len(entered) <= 1:
                 await client.send_message(message.channel, (
                     'AI-COMS // COMMAND SYNTAX ERROR // {0.author.mention} ISSUE `!event help`').format(message))
             else:
+                def niceEventPrint(event):
+                    msg = f"**INCURSION ID: **  {event.id}  //  **DATE: **{event.date}  //  **NAME: **{event.name.title()}\n \
+                            **INCURSION TYPE: **  {event.event_type}  //  **TARGET: **  {event.activity}\n **FIRETEAM LEADER: **  {event.slot_0} \n \
+                            **FIRETEAM: ** {event.slot_1}, {event.slot_2}, {event.slot_3}, {event.slot_4}, {event.slot_5} \n \
+                            **ALTERNATES: ** {event.alt_1}, {event.alt_2}, {event.alt_3}"
+                    return msg
+
                 # HELP
                 if (str(entered[1]) == 'help') or (len(entered) <= 1):
-                    msg = fireteam_actions.incursion_event_help()
-                    await client.send_message(message.channel, (msg.format(message)))
+                    msg = eventHandler.incursion_event_help()
+                    await client.send_message(message.channel, msg)
                 # Clean DB
                 elif str(entered[1]) == 'clean':
-                    fireteam_actions.expired_calendar_cleanup()
+                    eventHandler.expired_calendar_cleanup()
                     await client.send_message(message.channel, 'AI-HANDLER // DB CLEANED')
                 # Create a Test Event
                 elif str(entered[1]) == 'testevent':
@@ -414,7 +425,7 @@ def runBot(engine):
                     alt2 = "OPEN"
                     alt3 = "OPEN"
                     suppress = "0"
-                    fireteam_actions.incursion_update(this_event_id, this_event_name, this_event_occurs, this_type,
+                    eventHandler.incursion_update(this_event_id, this_event_name, this_event_occurs, this_type,
                                                       this_activity, this_author, slot1, slot2, slot3, slot4, slot5,
                                                       alt1, alt2, alt3, suppress)
                     await client.send_message(message.channel, 'Added test event!'.format(message))
@@ -435,7 +446,7 @@ def runBot(engine):
                     alt2 = "OPEN"
                     alt3 = "OPEN"
                     suppress = "0"
-                    fireteam_actions.incursion_update(this_event_id, this_event_name, this_event_occurs, this_type,
+                    eventHandler.incursion_update(this_event_id, this_event_name, this_event_occurs, this_type,
                                                       this_activity, this_author, slot1, slot2, slot3, slot4, slot5,
                                                       alt1, alt2, alt3, suppress)
                     await client.send_message(message.channel, 'Added test event!'.format(message))
@@ -456,106 +467,82 @@ def runBot(engine):
                     alt2 = "OPEN"
                     alt3 = "OPEN"
                     suppress = "0"
-                    fireteam_actions.incursion_update(this_event_id, this_event_name, this_event_occurs, this_type,
+                    eventHandler.incursion_update(this_event_id, this_event_name, this_event_occurs, this_type,
                                                       this_activity, this_author, slot1, slot2, slot3, slot4, slot5,
                                                       alt1, alt2, alt3, suppress)
                     await client.send_message(message.channel, 'Added test event!'.format(message))
 
                 # LIST
                 elif str(entered[1]) == 'list':
-                    out = fireteam_actions.incursion_query(0)
+                    out = eventHandler.incursion_query()
+                    print(out)
                     if not out or out is None:
                         await client.send_message(message.channel, 'AI-HANDLER // NO INCURSION EVENTS SCHEDULED')
                     else:
                         await client.send_message(message.channel, 'AI-HANDLER // CURRENT INCURSION EVENTS SCHEDULED')
-                        for row in out:
-                            msg = ('**INCURSION ID:**  ' + str(row[0]) + '  //  **DATE: **' + str(
-                                row[2]) + '  //  **NAME: **' + str(row[1]).title() + '\n **INCURSION TYPE:**  ' + str(
-                                row[3]) + '  //  **TARGET:**  ' + str(row[4]) + '\n **FIRETEAM LEADER:**  ' + str(
-                                row[5]) + '\n **FIRETEAM:**  ' + str(row[6]) + ', ' + str(row[7]) + ', ' + str(
-                                row[8]) + ', ' + str(row[9]) + ', ' + str(row[10]) + '\n **ALTERNATES:** ' + str(
-                                row[11]) + ', ' + str(row[12]) + ', ' + str(row[13]))
+                        for event in out:
+                            msg = niceEventPrint(event)
                             await client.send_message(message.channel, msg)
 
                 elif str(entered[1]) == 'suppressed-list':
-                    out = fireteam_actions.incursion_query(1)
+                    out = eventHandler.incursion_query(1)
                     if not out or out is None:
                         await client.send_message(message.channel, 'AI-HANDLER // NO INCURSION EVENTS SCHEDULED')
                     else:
                         await client.send_message(message.channel, 'AI-HANDLER // PAST INCURSION EVENTS SCHEDULED')
-                        for row in out:
-                            msg = ('**INCURSION ID:**  ' + str(row[0]) + '  //  **DATE: **' + str(
-                                row[2]) + '  //  **NAME: **' + str(row[1]).title() + '\n **INCUSION TYPE:**  ' + str(
-                                row[3]) + '  //  **TARGET:**  ' + str(row[4]) + '\n **FIRETEAM LEADER:**  ' + str(
-                                row[5]) + '\n **FIRETEAM:**  ' + str(row[6]) + ', ' + str(row[7]) + ', ' + str(
-                                row[8]) + ', ' + str(row[9]) + ', ' + str(row[10]) + '\n **ALTERNATES** ' + str(
-                                row[11]) + ', ' + str(row[12]) + ', ' + str(row[13]))
+                        for event in out:
+                            msg = niceEventPrint(event)
                             await client.send_message(message.channel, msg)
 
                 elif str(entered[1]) == 'all-list':
-                    out = fireteam_actions.incursion_query(4)
+                    out = eventHandler.incursion_query(4)
                     if not out or out is None:
                         await client.send_message(message.channel, 'AI-HANDLER // NO INCURSION EVENTS SCHEDULED')
                     else:
                         await client.send_message(message.channel,
                                                   'AI-HANDLER // ALL CURRENT AND PAST INCURSION EVENTS SCHEDULED')
-                        for row in out:
-                            msg = ('**INCURSION ID:**  ' + str(row[0]) + '  //  **DATE: **' + str(
-                                row[2]) + '  //  **NAME: **' + str(row[1]).title() + '\n **INCUSION TYPE:**  ' + str(
-                                row[3]) + '  //  **TARGET:**  ' + str(row[4]) + '\n **FIRETEAM LEADER:**  ' + str(
-                                row[5]) + '\n **FIRETEAM:**  ' + str(row[6]) + ', ' + str(row[7]) + ', ' + str(
-                                row[8]) + ', ' + str(row[9]) + ', ' + str(row[10]) + '\n **ALTERNATES** ' + str(
-                                row[11]) + ', ' + str(row[12]) + ', ' + str(row[13]))
+                        for event in out:
+                            msg = niceEventPrint(event)
                             await client.send_message(message.channel, msg)
 
                 # JOIN
                 elif str(entered[1]) == 'join':
                     this_event_id = entered[2]
-                    msg = fireteam_actions.incursion_join_fireteam(this_author, this_event_id)
-                    await client.send_message(message.channel, (msg).format(message))
+                    msg = eventHandler.incursion_join_fireteam(this_author, this_event_id)
+                    await client.send_message(message.channel, msg)
                 # ALT-JOIN
                 elif str(entered[1]) == 'alt-join':
                     this_event_id = entered[2]
-                    msg = fireteam_actions.incursion_join_alternate(this_author, this_event_id)
-                    await client.send_message(message.channel, (msg).format(message))
+                    msg = eventHandler.incursion_join_alternate(this_author, this_event_id)
+                    await client.send_message(message.channel, msg)
                 # LEAVE
                 elif str(entered[1]) == 'leave':
                     this_event_id = entered[2]
-                    msg = fireteam_actions.incursion_leave_fireteam(this_author, this_event_id)
-                    await client.send_message(message.channel, msg.format(message))
+                    msg = eventHandler.incursion_leave_fireteam(this_author, this_event_id)
+                    await client.send_message(message.channel, msg)
 
                 elif str(entered[1]) == 'alt-leave':
                     this_event_id = entered[2]
-                    msg = fireteam_actions.incursion_leave_alternate(this_author, this_event_id)
-                    await client.send_message(message.channel, msg.format(message))
+                    msg = eventHandler.incursion_leave_alternate(this_author, this_event_id)
+                    await client.send_message(message.channel, msg)
 
                 # DELETE EVENT
                 elif str(entered[1]) == 'delete':
-                    # this_event = entered[1].split('|')
                     this_event_id = entered[2]
-                    print("entered[2]: ", repr(entered[2]))
-                    event_row = fireteam_actions.incursion_lookup_by_id(this_event_id)
-                    # check for author in any slot
-                    # print('AI-HANDLER // RECEIVED DELETE REQUEST FOR \"'+str(event_row[1]).upper()+'\" FROM '+this_author)
-                    if this_author in event_row[5]:
-                        fireteam_actions.incursion_delete(this_event_id)
-                        await client.send_message(message.channel, 'AI-HANDLER // INCURSION EVENT ID ' + str(
-                            this_event_id) + ' EXPUNGED')
-                    else:
-                        await client.send_message(message.channel,
-                                                  'AI-HANDLER // ONLY THE FIRETEAM LEADER MAY EXPUNGE AN INCURSION')
+                    msg = eventHandler.incursion_delete(this_author, this_event_id)
+                    await client.send_message(message.channel, msg)
+                
                 # OVERRIDE DELETE
                 elif str(entered[1]) == 'override-delete':
-                    # this_event = entered[1].split('|')
                     this_event_id = entered[2]
-                    # lookup event
-                    fireteam_actions.incursion_delete(this_event_id)
-                    await client.send_message(message.channel, 'AI-HANDLER // INCURSION EVENT EXPUNGED VIA OVERRIDE')
+                    msg = eventHandler.incursion_delete("", this_event_id)
+                    await client.send_message(message.channel, msg)
+
                 # ADD INCURSION
                 elif str(entered[1]) == 'add':
                     this_event = entered[2].split('|')
-                    msg = fireteam_actions.incursion_create(this_author, this_event)
-                    await client.send_message(message.channel, msg.format(message))
+                    msg = eventHandler.incursion_create(this_author, this_event)
+                    await client.send_message(message.channel, msg)
 
         elif message.content.startswith('!sleep'):
             await asyncio.sleep(5)
@@ -797,11 +784,6 @@ def timeLeft():
     untilRelease = str((release - today).days)
     output = "There are " + untilRelease + " days until release!"
     return output
-
-
-fireteam_actions = Fireteam_Actions.FireteamFunctions()
-fireteam_actions.expired_calendar_cleanup()
-
 
 async def my_background_task():
     await client.wait_until_ready()

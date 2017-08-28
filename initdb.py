@@ -6,7 +6,10 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from destinygotg import loadConfig
 
+# APP_PATH = "/etc/destinygotg"
+# DBPATH = f"{APP_PATH}/guardians.db"
 Base = declarative_base()
+#engine = create_engine(f"sqlite:///{DBPATH}")#, echo=True)
 
 class Bungie(Base):
     __tablename__ = 'bungie'
