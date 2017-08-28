@@ -475,7 +475,7 @@ def runBot():
                 # LIST
                 elif str(entered[1]) == 'list':
                     out = eventHandler.incursion_query()
-                    print(out)
+                    #print(out)
                     if not out or out is None:
                         await client.send_message(message.channel, 'AI-HANDLER // NO INCURSION EVENTS SCHEDULED')
                     else:
@@ -542,7 +542,7 @@ def runBot():
                 elif str(entered[1]) == 'add':
                     this_event = entered[2].split('|')
                     msg = eventHandler.incursion_create(this_author, this_event)
-                    await client.send_message(message.channel, msg)
+                    await client.send_message(message.channel, msg.format(message))
 
         elif message.content.startswith('!sleep'):
             await asyncio.sleep(5)
