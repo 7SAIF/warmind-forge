@@ -54,6 +54,7 @@ class FireteamFunctions(object):
             else:
                 new_suppress = 0
             session.query(Event).filter_by(id = event.id).update({Event.suppress:1})
+        session.commit()
 
     def create_test_event(self):
         # UNUSED
@@ -173,18 +174,20 @@ class FireteamFunctions(object):
         # FIND FIRST OPEN SLOT
         slot = ""
         for i in range(3,0,-1):
-            if alts[f"alt_{i}"] != "OPEN":
+            if alts[f"alt_{i}"] == "OPEN":
                 slot = f"alt_{i}"
         for i in range(5,-1,-1):
-            if guardians[f"slot_{i}"] != "OPEN":
+            if guardians[f"slot_{i}"] == "OPEN":
                 slot = f"slot_{i}"
 
-        if slot.starswith("alt"):
+        #print(slot)
+        if slot.startswith("alt"):
             msg = f'AI-HANDLER // GUARDIAN ASSIGNED TO FIRETEAM ALTERNATE FOR INCURSION {this_event_id}'
         elif slot.startswith("slot"):
             msg = f'AI-HANDLER // GUARDIAN ASSIGNED TO FIRETEAM FOR INCURSION {this_event_id}'
 
-        session.query(Event).filter_by(id = event.id).update({getattr(event, slot):this_author})
+        session.query(Event).filter_by(id = event.id).update({slot:this_author})
+        session.commit()
         return msg
 
     def incursion_join_alternate(self, this_author, this_event_id):
@@ -205,12 +208,13 @@ class FireteamFunctions(object):
         # FIND FIRST OPEN SLOT
         slot = ""
         for i in range(3,0,-1):
-            if alts[f"alt_{i}"] != "OPEN":
+            if alts[f"alt_{i}"] == "OPEN":
                 slot = f"alt_{i}"
 
         # We can just say the user is assigned, because we already know there is space.
         msg = f'AI-HANDLER // GUARDIAN ASSIGNED TO FIRETEAM ALTERNATE FOR INCURSION {this_event_id}'
-        session.query(Event).filter_by(id = event.id).update({getattr(event, slot):this_author})
+        session.query(Event).filter_by(id = event.id).update({slot:this_author})
+        session.commit()
         return msg
 
     def incursion_leave_fireteam(self, this_author, this_event_id):
@@ -232,6 +236,7 @@ class FireteamFunctions(object):
             if guardian == this_author:
                 # print(slot)
                 session.query(Event).filter_by(id = event.id).update({slot : "OPEN"})
+        session.commit()
 
         msg = f"AI-HANDLER // {this_author} REMOVED FROM FIRETEAM."
         modifiedGuardians = {"slot_0":event.slot_0, "slot_1":event.slot_1, "slot_2":event.slot_2, "slot_3":event.slot_3, "slot_4":event.slot_4, "slot_5":event.slot_5}
@@ -251,12 +256,17 @@ class FireteamFunctions(object):
             # Here we define a list of slots so that we can reshuffle the active guardians
             slots = ["slot_0", "slot_1", "slot_2", "slot_3", "slot_4", "slot_5"]
             # Now we trim the new active slot list down to size
-            slots = slots[0:len(shift_list)-1]
+            # slots = slots[0:len(shift_list)]
             # Finally, iterate through the range and shuffle guardians down to the first active slots
             for i in range(len(slots)):
                 if i == 0:
                     msg = f'AI-HANDLER // {shift_list[i]} PROMOTED TO FIRETEAM LEADER.'
-                session.query(Event).filter_by(id = event.id).update({slots[i] : shift_list[i]})
+                try:
+                    to_insert = shift_list[i]
+                except IndexError:
+                    to_insert = "OPEN"
+                session.query(Event).filter_by(id = event.id).update({slots[i] : to_insert})
+        session.commit()
         return msg
 
     def incursion_leave_alternate(self, this_author, this_event_id):
@@ -269,6 +279,7 @@ class FireteamFunctions(object):
         for slot, guardian in guardians:
             if guardian == this_author:
                 session.query(Event).filter_by(id = event.id).update({slot : "OPEN"})
+        session.commit()
 
         msg = f"AI-HANDLER // {this_author} REMOVED FROM FIRETEAM ALTERNATES."
         modifiedGuardians = {"alt_1":event.alt_1, "alt_2":event.alt_2, "alt_3":event.alt_3}
@@ -287,10 +298,16 @@ class FireteamFunctions(object):
             # Here we define a list of slots so that we can reshuffle the active guardians
             slots = ["alt_1", "alt_2", "alt_3"]
             # Now we trim the new active slot list down to size
-            slots = slots[0:len(shift_list)-1]
             # Finally, iterate through the range and shuffle guardians down to the first active slots
             for i in range(len(slots)):
-                session.query(Event).filter_by(id = event.id).update({slots[i] : shift_list[i]})
+                if i == 0:
+                    msg = f'AI-HANDLER // {shift_list[i]} PROMOTED TO FIRETEAM LEADER.'
+                try:
+                    to_insert = shift_list[i]
+                except IndexError:
+                    to_insert = "OPEN"
+                session.query(Event).filter_by(id = event.id).update({slots[i] : to_insert})
+        session.commit()
         return msg
 
     def incursion_update(self, this_event_id, this_event_name, this_event_occurs, this_type, this_activity, this_slot0,
@@ -314,6 +331,7 @@ class FireteamFunctions(object):
         else:
             # print("id is " + str(this_event_id))
             session.query(Event).filter_by(**eventDict).update({column: getattr(obj, column) for column in table.__table__.columns.keys()})
+        session.commit()
 
     def incursion_query(self, flag=-1):
         if flag == 1:
