@@ -188,8 +188,8 @@ def runBot(engine):
     @client.event
     async def on_member_join(member):
         server = member.server
-        msg = 'Guardian {0.mention} now joined server {1.name}!'
-        await client.send_message(server, msg.format(member, server))
+        msg = f'Guardian {member.mention} now joined server {server.name}!'
+        await client.send_message(server, msg)
 
     @client.event
     async def registerHandler(discordAuthor):
@@ -209,7 +209,7 @@ def runBot(engine):
         # Need to send a DM requesting the PSN name
         destination = discordAuthor
         discName = discordAuthor.name
-        await client.send_message(destination, discName + ", please enter your PSN display name.")
+        await client.send_message(destination, f"{discName}, please enter your PSN display name.")
         nameMsg = await client.wait_for_message(author=discordAuthor, check=checkIfValidUser(discName))
         destName = nameMsg.content
         discordDict = {}
@@ -219,7 +219,7 @@ def runBot(engine):
         new_discord_user = Discord(**discordDict)
         session.add(new_discord_user)
         session.commit()
-        await client.send_message(destination, discName + ", you have been successfully registered!")
+        await client.send_message(destination, f"{discName}, you have been successfully registered!")
         return destName
 
     @client.event
@@ -302,13 +302,14 @@ def runBot(engine):
         elif message.content.startswith("!clanstat"):
             pass
 
-        # TODO: switch this to role admin
-        elif (message.content.startswith('!test')) and (("N1N3 13#7837" == author) or ("Irronies#9467" == author)):
-            entered = message.content
-            entered = entered.split(' ', 1)
-            entered = str(entered[1])
-            msg1 = (f"{author.mention} you entered: {entered}")
-            await client.send_message(message.channel, msg1)
+        elif (message.content.startswith('!test')):
+            administratorRole = "@administrator"
+            if administratorRole in [role.name for role in message.author.roles]:
+                entered = message.content
+                entered = entered.split(' ', 1)
+                entered = str(entered[1])
+                msg1 = (f"{author.mention} you entered: {entered}")
+                await client.send_message(message.channel, msg1)
             # out = ai_actions.get_activity("Weekly Heroic Strike")
             # msg2 = ('{0.author.mention} // Weekly Heroic Strike // ' + out[1] + '\n'
             #        '   SKULLS // ' + out[2]).format(message)
@@ -596,7 +597,7 @@ def runBot(engine):
             msg = f"{author.mention} // PLEASE SEE RUSTY (SWEEPER BOT-63) TO PROCURE A BOX.\n1. Cut a hole in the box\n' \
                 '2. Put your junk in that box\n3. Make her open the box"
             await client.send_message(message.channel, msg)
-
+        
         elif message.content.startswith('!clean') or message.content.startswith('!pay') or message.content.startswith(
                 '!die'):
             msg = f"{author.mention} // PLEASE SEE RUSTY (SWEEPER BOT-63), REQUEST 'DOMESTIC ASSISTANCE'"
