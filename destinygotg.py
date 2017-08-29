@@ -73,11 +73,30 @@ def generateConfig():
 def configExists():
     """Check if there are any missing fields, or if the file doesn't exist"""
     if os.path.exists(f"{APP_PATH}/config"):
-        return True
+        # TODO: CHECK THIS
+        #     Implement config file checker to see if it has all fields
+        # Does config have data?
+        loadConfig()
+        if not os.environ['BUNGIE_APIKEY']:
+            print('Missing Bungie API Key')
+            return False
+        if not os.environ['BUNGIE_CLANID']:
+            print('Missing Bungie Clan ID')
+            return False
+        if not os.environ['DISCORD_APIKEY']:
+            print('Missing Disconrd API Key')
+            return False
+        if not os.environ['DBPATH']:
+            print('Missing Database Path')
+            return False
+        if not os.environ['MANIFEST_CONTENT']:
+            print('Missing Manifest Content')
+            return False
+        else:
+            return True
     else:
         print("No config file")
         return False
-    #TODO: Implement config file checker to see if it has all fields
 
 def loadConfig():
     """Load configs from the config file"""

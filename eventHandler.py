@@ -171,6 +171,10 @@ class FireteamFunctions(object):
                 msg = 'AI-HANDLER // FIRETEAM CONTAINS MAXIMUM NUMBER OF GUARDIANS - ALL ALTERNATE SLOTS FILLED'
                 # print(msg)
                 return msg
+        # Check if Guardian is in the Alternates List
+        if this_author in alts.values():
+            msg = 'AI-HANDLER // COMMITTING REQUESTING GUARDIAN TO INCURSION - MOVING FROM ALTERNATES TO FIRETEAM'
+
         # FIND FIRST OPEN SLOT
         slot = ""
         for i in range(3,0,-1):
@@ -182,7 +186,7 @@ class FireteamFunctions(object):
 
         #print(slot)
         if slot.startswith("alt"):
-            msg = f'AI-HANDLER // GUARDIAN ASSIGNED TO FIRETEAM ALTERNATE FOR INCURSION {this_event_id}'
+            msg = f'AI-HANDLER // GUARDIAN ASSIGNED TO FIRETEAM AS ALTERNATE FOR INCURSION {this_event_id}'
         elif slot.startswith("slot"):
             msg = f'AI-HANDLER // GUARDIAN ASSIGNED TO FIRETEAM FOR INCURSION {this_event_id}'
 
@@ -193,8 +197,9 @@ class FireteamFunctions(object):
     def incursion_join_alternate(self, this_author, this_event_id):
         # print('update calendar')
         event = self.incursion_lookup_by_id(this_event_id)
-        guardians = {"slot_0":event.slot_0, "slot_1":event.slot_1, "slot_2":event.slot_2, "slot_3":event.slot_3, "slot_4":event.slot_4, "slot_5":event.slot_5}
-        alts = {"alt_1":event.alt_1, "alt_2":event.alt_2, "alt_3":event.alt_3}
+        guardians = {"slot_0": event.slot_0, "slot_1": event.slot_1, "slot_2": event.slot_2, "slot_3": event.slot_3,
+                     "slot_4": event.slot_4, "slot_5": event.slot_5}
+        alts = {"alt_1": event.alt_1, "alt_2": event.alt_2, "alt_3": event.alt_3}
         if this_author in guardians.values():
             # print("exists")
             msg = 'AI-HANDLER // REQUESTING GUARDIAN ALREADY ASSIGNED TO FIRETEAM'
@@ -210,7 +215,6 @@ class FireteamFunctions(object):
         for i in range(3,0,-1):
             if alts[f"alt_{i}"] == "OPEN":
                 slot = f"alt_{i}"
-
         # We can just say the user is assigned, because we already know there is space.
         msg = f'AI-HANDLER // GUARDIAN ASSIGNED TO FIRETEAM ALTERNATE FOR INCURSION {this_event_id}'
         session.query(Event).filter_by(id = event.id).update({slot:this_author})
