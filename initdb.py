@@ -541,7 +541,7 @@ class LastUpdated(Base):
     table_name = Column(String(50))
     last_updated = Column(DateTime)
 
-def initDB(engine):
+def initDB():
     Base.metadata.bind = engine
     #Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)

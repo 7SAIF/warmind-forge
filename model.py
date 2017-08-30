@@ -15,9 +15,9 @@ def checkDB():
     """Check to see if a database exists"""
     return os.path.isfile(os.environ['DBPATH'])
 
-def initDB(engine):
+def initDB():
     """Sets up the tables for the database"""
-    initdb.initDB(engine)
+    initdb.initDB()
 
 def checkManifest():
     """Check to see if manifest file exists"""
