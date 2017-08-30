@@ -5,6 +5,8 @@ import model
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
+# VERSION 0.1
+
 APP_PATH = "/etc/destinygotg"
 DBPATH = f"{APP_PATH}/guardians.db"
 
@@ -63,6 +65,9 @@ def generateConfig():
     apikey = input("Please enter your Bungie API Key: ")
     clanid = input("Please enter your Clan ID: ")
     disc_apikey = input("Please enter your Discord API Key: ")
+    # TODO:  make Clan ID a list or pulled from the DB.
+    # Could be clan table: primary clan and allied clans, since this is basically a white list.
+    # usecase: DoD ChattaWhyte Krew and ChattaWhyte Kidz or DoD main clan and allied clans.
     config.write(f"BUNGIE_APIKEY:{apikey}\n")
     config.write(f"BUNGIE_CLANID:{clanid}\n")
     config.write(f"DISCORD_APIKEY:{disc_apikey}\n")
