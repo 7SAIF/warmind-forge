@@ -8,21 +8,14 @@ import discord
 import matplotlib as mpl
 import numpy as np
 from sqlalchemy import exists, func, and_
-
-from destinygotg import Session
+from warmind import Session
 from initdb import PvPAggregate, Discord, Account, AccountMedals, Character, ClassReference
-
 mpl.use('Agg')
 import matplotlib.pyplot as plt
-
 plt.rcdefaults()
 import eventHandler
 
 eventHandler = eventHandler.FireteamFunctions()
-# from warmind import Fireteam_Actions
-# from warmind import SQL_Actions
-# from warmind.Global_Variables import *
-
 playerList = [item[0] for item in Session().query(Account.display_name).all()]
 
 statDict = {"kd": (PvPAggregate, "killsDeathsRatio", "Kill/Death Ratio"),

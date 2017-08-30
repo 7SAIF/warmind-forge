@@ -33,9 +33,9 @@ def main():
         model.getManifest()
     
     if not model.checkDB():
-        model.initDB(engine)
+        model.initDB()
     
-    model.initDB(engine)
+    model.initDB()
     model.buildDB()
     
     model.runDiscord()

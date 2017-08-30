@@ -9,7 +9,7 @@ from sqlalchemy import exists, and_
 from sqlalchemy.sql.expression import literal_column
 from sqlalchemy.inspection import inspect
 from initdb import Base, Bungie, Account, PvPAggregate, PvEAggregate, Character, AccountWeaponUsage, CharacterActivityStats, AccountMedals, ActivityReference, ClassReference, WeaponReference, ActivityTypeReference, BucketReference, AccountActivityModeStats, LastUpdated
-from destinygotg import Session, loadConfig
+from warmind import Session, loadConfig
 import importlib, time, itertools
 from functools import partial
 
