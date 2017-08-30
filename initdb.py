@@ -4,7 +4,7 @@ import sys
 from sqlalchemy import Column, ForeignKey, Integer, String, Float, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
-from destinygotg import loadConfig
+from warmind import loadConfig, engine
 
 Base = declarative_base()
 
@@ -541,7 +541,7 @@ class LastUpdated(Base):
     table_name = Column(String(50))
     last_updated = Column(DateTime)
 
-def initDB(engine):
+def initDB():
     Base.metadata.bind = engine
     #Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)

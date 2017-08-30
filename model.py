@@ -6,6 +6,7 @@ import builddb
 import requests, zipfile
 import shutil
 import discordController
+import eventHandler
 
 APP_PATH = "/etc/destinygotg"
 DBPATH = f"{APP_PATH}/guardians.db"
@@ -14,9 +15,9 @@ def checkDB():
     """Check to see if a database exists"""
     return os.path.isfile(os.environ['DBPATH'])
 
-def initDB(engine):
+def initDB():
     """Sets up the tables for the database"""
-    initdb.initDB(engine)
+    initdb.initDB()
 
 def checkManifest():
     """Check to see if manifest file exists"""
@@ -42,5 +43,7 @@ def buildDB():
     """Main function to build the full database"""
     builddb.buildDB()
 
-def runDiscord(engine):
-    discordController.runBot(engine)
+def runDiscord():
+    # Some notion of installing and running plugins. For now, hardcoded.
+    eventHandler.initdb()
+    discordController.runBot()
