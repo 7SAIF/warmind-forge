@@ -35,12 +35,12 @@ def main():
         model.getManifest()
     
     if not model.checkDB():
-        model.initDB()
+        model.initDB(engine)
     
-    model.initDB()
+    model.initDB(engine)
     model.buildDB()
     
-    model.runDiscord()
+    model.runDiscord(engine)
     #runFlask()
 
 def setAppPath():

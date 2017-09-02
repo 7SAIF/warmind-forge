@@ -15,9 +15,9 @@ def checkDB():
     """Check to see if a database exists"""
     return os.path.isfile(os.environ['DBPATH'])
 
-def initDB():
+def initDB(engine):
     """Sets up the tables for the database"""
-    initdb.initDB()
+    initdb.initDB(engine)
 
 def checkManifest():
     """Check to see if manifest file exists"""
@@ -25,7 +25,7 @@ def checkManifest():
 
 def getManifest():
     """Pulls the requested definitions into the manifest database"""
-    manifest_url = "http://www.bungie.net/Platform/Destiny/Manifest/"
+    manifest_url = "http://www.bungie.net/Platform/Destiny2/Manifest/"
     r = requests.get(manifest_url)
     manifest = r.json()
     mani_url = f"http://www.bungie.net/{manifest['Response']['mobileWorldContentPaths']['en']}"
@@ -43,7 +43,7 @@ def buildDB():
     """Main function to build the full database"""
     builddb.buildDB()
 
-def runDiscord():
+def runDiscord(engine):
     # Some notion of installing and running plugins. For now, hardcoded.
     eventHandler.initdb()
-    discordController.runBot()
+    discordController.runBot(engine)
